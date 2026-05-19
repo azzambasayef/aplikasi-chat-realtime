@@ -33,7 +33,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Struktur database chat
 - [x] Model dan relasi chat
 - [x] Private chat
-- [ ] Group chat
+- [x] Group chat
 - [ ] WebSocket integration
 - [ ] User presence tracking
 
@@ -78,3 +78,9 @@ Relasi ini menjadi dasar untuk pengembangan fitur private chat dan group chat pa
 Pada tahap ini, fitur private chat dasar mulai dibuat. User dapat memilih user lain dari daftar private chat, membuka ruang percakapan, mengirim pesan, dan melihat riwayat pesan.
 
 Pesan yang dikirim sudah tersimpan ke dalam tabel messages dan terhubung dengan tabel conversations. Pada tahap ini, pengiriman pesan masih menggunakan proses request biasa dan belum menggunakan WebSocket atau real-time.
+
+## Progress 8 - Group Chat Dasar
+
+Pada tahap ini, fitur group chat dasar mulai dibuat. User dapat membuat group, memilih anggota group, membuka ruang group chat, mengirim pesan, dan melihat riwayat pesan group.
+
+Data group tersimpan pada tabel chat_groups, data anggota group tersimpan pada tabel chat_group_user, sedangkan pesan group tersimpan pada tabel messages dengan kolom chat_group_id. Pada tahap ini, pengiriman pesan group masih menggunakan request biasa dan belum menggunakan WebSocket atau real-time.

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChatGroup;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -23,6 +24,12 @@ class ChatController extends Controller
             ->orderBy('name')
             ->get();
 
+        $chatGroups = ChatGroup::whereHas('users', function ($query) use ($authUserId) {
+                $query->where('users.id', $authUserId);
+            })
+            ->orderBy('name')
+            ->get();
+
         $conversation = $this->getOrCreateConversation($user);
 
         $messages = $conversation->messages()
@@ -32,6 +39,7 @@ class ChatController extends Controller
 
         return view('dashboard', [
             'users' => $users,
+            'chatGroups' => $chatGroups,
             'selectedUser' => $user,
             'selectedConversation' => $conversation,
             'messages' => $messages,

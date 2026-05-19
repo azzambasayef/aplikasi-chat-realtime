@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $availableUsers = collect($users ?? []);
+    $userGroups = collect($chatGroups ?? []);
+    $chatMessages = collect($messages ?? []);
+
+    $activeUserId = isset($selectedUser) ? (int) $selectedUser->getKey() : null;
+    $activeGroupId = isset($selectedGroup) ? (int) $selectedGroup->getKey() : null;
+@endphp
+
 <div class="row g-3">
     <div class="col-md-3">
         <div class="card shadow-sm border-0 h-100">
@@ -9,16 +18,21 @@
             </div>
 
             <div class="card-body p-0">
-                @forelse ($users as $user)
+                @forelse ($availableUsers as $privateUser)
+                    @php
+                        $privateUserId = (int) $privateUser->getKey();
+                        $privateUserName = $privateUser->getAttribute('name');
+                        $privateUserEmail = $privateUser->getAttribute('email');
+                    @endphp
+
                     <a 
-                        href="{{ route('private.chat', $user->id) }}" 
+                        href="{{ route('private.chat', $privateUserId) }}" 
                         class="text-decoration-none text-dark"
                     >
-                        <div class="d-flex align-items-center justify-content-between border-bottom p-3 
-                            {{ isset($selectedUser) && $selectedUser->id === $user->id ? 'bg-light' : '' }}">
+                        <div class="d-flex align-items-center justify-content-between border-bottom p-3 {{ $activeUserId === $privateUserId ? 'bg-light' : '' }}">
                             <div>
-                                <div class="fw-semibold">{{ $user->name }}</div>
-                                <small class="text-muted">{{ $user->email }}</small>
+                                <div class="fw-semibold">{{ $privateUserName }}</div>
+                                <small class="text-muted">{{ $privateUserEmail }}</small>
                             </div>
 
                             <span class="badge bg-secondary">
@@ -39,21 +53,32 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white">
                 @isset($selectedUser)
-                    <div class="fw-bold">{{ $selectedUser->name }}</div>
-                    <small class="text-muted">{{ $selectedUser->email }}</small>
+                    <div class="fw-bold">{{ $selectedUser->getAttribute('name') }}</div>
+                    <small class="text-muted">{{ $selectedUser->getAttribute('email') }}</small>
+                @elseif(isset($selectedGroup))
+                    <div class="fw-bold">{{ $selectedGroup->getAttribute('name') }}</div>
+                    <small class="text-muted">
+                        {{ $selectedGroup->getAttribute('description') ?? 'Group chat' }}
+                    </small>
                 @else
                     <div class="fw-bold">Ruang Chat</div>
                     <small class="text-muted">
-                        Pilih user untuk mulai private chat.
+                        Pilih user atau group untuk mulai chat.
                     </small>
                 @endisset
             </div>
 
             <div class="card-body" style="min-height: 420px; max-height: 420px; overflow-y: auto;">
-                @isset($selectedUser)
-                    @forelse ($messages as $message)
+                @if(isset($selectedUser) || isset($selectedGroup))
+                    @forelse ($chatMessages as $chatMessage)
                         @php
-                            $isOwnMessage = $message->sender_id === Auth::id();
+                            $senderId = (int) $chatMessage->getAttribute('sender_id');
+                            $messageText = $chatMessage->getAttribute('message');
+                            $createdAt = $chatMessage->getAttribute('created_at');
+                            $sender = $chatMessage->getRelationValue('sender');
+
+                            $isOwnMessage = $senderId === (int) Auth::id();
+                            $senderName = $isOwnMessage ? 'Saya' : ($sender?->getAttribute('name') ?? 'User');
                         @endphp
 
                         <div class="d-flex mb-3 {{ $isOwnMessage ? 'justify-content-end' : 'justify-content-start' }}">
@@ -62,15 +87,15 @@
                                 style="max-width: 75%;"
                             >
                                 <div class="small fw-bold mb-1">
-                                    {{ $isOwnMessage ? 'Saya' : $message->sender->name }}
+                                    {{ $senderName }}
                                 </div>
 
                                 <div>
-                                    {{ $message->message }}
+                                    {{ $messageText }}
                                 </div>
 
                                 <div class="small mt-2 {{ $isOwnMessage ? 'text-white-50' : 'text-muted' }}">
-                                    {{ $message->created_at->format('H:i') }}
+                                    {{ $createdAt ? $createdAt->format('H:i') : '-' }}
                                 </div>
                             </div>
                         </div>
@@ -87,16 +112,16 @@
                         <div class="text-center text-muted">
                             <h5>Belum ada percakapan dipilih</h5>
                             <p class="mb-0">
-                                Pilih salah satu user di sebelah kiri untuk membuka private chat.
+                                Pilih user atau group untuk membuka ruang chat.
                             </p>
                         </div>
                     </div>
-                @endisset
+                @endif
             </div>
 
             <div class="card-footer bg-white">
                 @isset($selectedUser)
-                    <form action="{{ route('private.chat.send', $selectedUser->id) }}" method="POST">
+                    <form action="{{ route('private.chat.send', $selectedUser->getKey()) }}" method="POST">
                         @csrf
 
                         <div class="input-group">
@@ -105,6 +130,30 @@
                                 name="message"
                                 class="form-control @error('message') is-invalid @enderror" 
                                 placeholder="Tulis pesan..." 
+                                autocomplete="off"
+                                required
+                            >
+                            <button class="btn btn-primary" type="submit">
+                                Kirim
+                            </button>
+
+                            @error('message')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </form>
+                @elseif(isset($selectedGroup))
+                    <form action="{{ route('group.chat.send', $selectedGroup->getKey()) }}" method="POST">
+                        @csrf
+
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                name="message"
+                                class="form-control @error('message') is-invalid @enderror" 
+                                placeholder="Tulis pesan ke group..." 
                                 autocomplete="off"
                                 required
                             >
@@ -132,7 +181,7 @@
                         </button>
                     </div>
                     <small class="text-muted">
-                        Pilih user terlebih dahulu untuk mengirim pesan.
+                        Pilih user atau group terlebih dahulu untuk mengirim pesan.
                     </small>
                 @endisset
             </div>
@@ -145,18 +194,101 @@
                 Group Chat
             </div>
 
+            <div class="card-body p-0">
+                @forelse ($userGroups as $group)
+                    @php
+                        $groupId = (int) $group->getKey();
+                        $groupName = $group->getAttribute('name');
+                        $groupDescription = $group->getAttribute('description') ?? 'Tidak ada deskripsi';
+                    @endphp
+
+                    <a 
+                        href="{{ route('group.chat', $groupId) }}" 
+                        class="text-decoration-none text-dark"
+                    >
+                        <div class="border-bottom p-3 {{ $activeGroupId === $groupId ? 'bg-light' : '' }}">
+                            <div class="fw-semibold">{{ $groupName }}</div>
+                            <small class="text-muted">
+                                {{ $groupDescription }}
+                            </small>
+                        </div>
+                    </a>
+                @empty
+                    <div class="p-3 text-muted">
+                        Belum ada group chat.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-white fw-bold">
+                Buat Group
+            </div>
+
             <div class="card-body">
-                <p class="text-muted mb-3">
-                    Belum ada group chat.
-                </p>
+                <form action="{{ route('groups.store') }}" method="POST">
+                    @csrf
 
-                <button class="btn btn-outline-primary w-100" disabled>
-                    Buat Group
-                </button>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nama Group</label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            id="name" 
+                            class="form-control @error('name') is-invalid @enderror"
+                            placeholder="Masukkan nama group"
+                            required
+                        >
 
-                <small class="text-muted d-block mt-2">
-                    Fitur group akan dibuat pada tahap berikutnya.
-                </small>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Deskripsi</label>
+                        <textarea 
+                            name="description" 
+                            id="description" 
+                            rows="2" 
+                            class="form-control"
+                            placeholder="Deskripsi singkat group"
+                        ></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Anggota</label>
+
+                        @forelse ($availableUsers as $memberUser)
+                            @php
+                                $memberUserId = (int) $memberUser->getKey();
+                                $memberUserName = $memberUser->getAttribute('name');
+                            @endphp
+
+                            <div class="form-check">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    name="member_ids[]" 
+                                    value="{{ $memberUserId }}" 
+                                    id="member-{{ $memberUserId }}"
+                                >
+                                <label class="form-check-label" for="member-{{ $memberUserId }}">
+                                    {{ $memberUserName }}
+                                </label>
+                            </div>
+                        @empty
+                            <small class="text-muted">
+                                Belum ada user lain yang dapat ditambahkan.
+                            </small>
+                        @endforelse
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        Buat Group
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -167,7 +299,7 @@
 
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span>{{ Auth::user()->name }}</span>
+                    <span>{{ Auth::user()->getAttribute('name') }}</span>
                     <span class="badge bg-success">Online</span>
                 </div>
 
