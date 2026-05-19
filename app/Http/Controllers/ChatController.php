@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\PrivateMessageSent;
 
 class ChatController extends Controller
 {
@@ -61,11 +62,13 @@ class ChatController extends Controller
 
         $conversation = $this->getOrCreateConversation($user);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => $authUserId,
             'conversation_id' => $conversation->getKey(),
             'message' => $validatedData['message'],
         ]);
+
+        broadcast(new PrivateMessageSent($message))->toOthers();
 
         return redirect()->route('private.chat', $selectedUserId);
     }
