@@ -30,6 +30,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Menjalankan migration awal Laravel
 - [x] User authentication
 - [x] Dashboard chat
+- [x] Struktur database chat
 - [ ] Private chat
 - [ ] Group chat
 - [ ] WebSocket integration
@@ -58,3 +59,9 @@ Halaman dashboard juga sudah dilindungi menggunakan middleware auth, sehingga ha
 Pada tahap ini, dashboard aplikasi mulai dibuat menyerupai tampilan aplikasi chat. Dashboard menampilkan daftar user untuk kebutuhan private chat, area ruang chat, bagian group chat, dan bagian user presence.
 
 Fitur pengiriman pesan, group chat, dan status online/offline belum diaktifkan pada tahap ini karena akan dikembangkan secara bertahap pada progress berikutnya.
+
+## Progress 5 - Struktur Database Chat
+
+Pada tahap ini, struktur database untuk fitur chat mulai dibuat. Tabel yang ditambahkan adalah conversations, chat_groups, chat_group_user, dan messages.
+
+Tabel conversations digunakan untuk menyimpan ruang private chat antar dua user. Tabel chat_groups digunakan untuk menyimpan data group chat. Tabel chat_group_user digunakan untuk menyimpan anggota group, sedangkan tabel messages digunakan untuk menyimpan pesan private chat maupun group chat.
