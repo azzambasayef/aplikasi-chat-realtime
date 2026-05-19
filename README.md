@@ -28,7 +28,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Pembuatan dokumentasi awal
 - [x] Konfigurasi database MySQL
 - [x] Menjalankan migration awal Laravel
-- [ ] User authentication
+- [x] User authentication
 - [ ] Dashboard chat
 - [ ] Private chat
 - [ ] Group chat
@@ -46,3 +46,9 @@ Pada tahap awal, project Laravel berhasil dibuat dan dihubungkan ke repository G
 ## Progress 2 - Database Configuration
 
 Pada tahap ini, aplikasi dikonfigurasi agar terhubung dengan database MySQL menggunakan XAMPP. Migration bawaan Laravel sudah dijalankan untuk membuat tabel awal seperti users, cache, jobs, dan migrations.
+
+## Progress 3 - User Authentication
+
+Pada tahap ini, aplikasi sudah memiliki fitur autentikasi dasar. User dapat melakukan register, login, logout, dan mengakses dashboard setelah berhasil login.
+
+Halaman dashboard juga sudah dilindungi menggunakan middleware auth, sehingga hanya user yang sudah login yang dapat mengakses halaman tersebut. Selain itu, data user yang melakukan registrasi berhasil tersimpan ke dalam tabel users pada database MySQL.
