@@ -1,51 +1,106 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0">
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold">
+                Private Chat
+            </div>
+
+            <div class="card-body p-0">
+                @forelse ($users as $user)
+                    <div class="d-flex align-items-center justify-content-between border-bottom p-3">
+                        <div>
+                            <div class="fw-semibold">{{ $user->name }}</div>
+                            <small class="text-muted">{{ $user->email }}</small>
+                        </div>
+
+                        <span class="badge bg-secondary">
+                            Offline
+                        </span>
+                    </div>
+                @empty
+                    <div class="p-3 text-muted">
+                        Belum ada user lain.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <div class="fw-bold">Ruang Chat</div>
+                <small class="text-muted">
+                    Pilih user atau group untuk mulai chat.
+                </small>
+            </div>
+
+            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 420px;">
+                <div class="text-center text-muted">
+                    <h5>Belum ada percakapan dipilih</h5>
+                    <p class="mb-0">
+                        Fitur pengiriman pesan akan dibuat pada tahap private chat dan group chat.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="Tulis pesan..." 
+                        disabled
+                    >
+                    <button class="btn btn-primary" disabled>
+                        Kirim
+                    </button>
+                </div>
+                <small class="text-muted">
+                    Form pesan masih dinonaktifkan sampai fitur chat dibuat.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-white fw-bold">
+                Group Chat
+            </div>
+
             <div class="card-body">
-                <h4 class="mb-3">Dashboard Chat</h4>
-
-                <p class="mb-1">
-                    Selamat datang, <strong>{{ Auth::user()->name }}</strong>.
+                <p class="text-muted mb-3">
+                    Belum ada group chat.
                 </p>
 
-                <p class="text-muted">
-                    Halaman ini nantinya akan digunakan sebagai halaman utama untuk fitur private chat, group chat, dan status online/offline user.
-                </p>
+                <button class="btn btn-outline-primary w-100" disabled>
+                    Buat Group
+                </button>
 
-                <hr>
+                <small class="text-muted d-block mt-2">
+                    Fitur group akan dibuat pada tahap berikutnya.
+                </small>
+            </div>
+        </div>
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="border rounded p-3 bg-light h-100">
-                            <h6>Daftar User</h6>
-                            <p class="text-muted mb-0">
-                                Area ini nantinya menampilkan daftar user untuk private chat.
-                            </p>
-                        </div>
-                    </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">
+                User Presence
+            </div>
 
-                    <div class="col-md-4">
-                        <div class="border rounded p-3 bg-light h-100">
-                            <h6>Group Chat</h6>
-                            <p class="text-muted mb-0">
-                                Area ini nantinya menampilkan daftar group chat.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="border rounded p-3 bg-light h-100">
-                            <h6>Status User</h6>
-                            <p class="text-muted mb-0">
-                                Area ini nantinya menampilkan status online dan offline.
-                            </p>
-                        </div>
-                    </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span>{{ Auth::user()->name }}</span>
+                    <span class="badge bg-success">Online</span>
                 </div>
 
+                <p class="text-muted mb-0">
+                    Status online/offline user lain akan dibuat menggunakan Laravel Reverb pada tahap presence tracking.
+                </p>
             </div>
         </div>
     </div>

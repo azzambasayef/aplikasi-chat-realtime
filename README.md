@@ -29,7 +29,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Konfigurasi database MySQL
 - [x] Menjalankan migration awal Laravel
 - [x] User authentication
-- [ ] Dashboard chat
+- [x] Dashboard chat
 - [ ] Private chat
 - [ ] Group chat
 - [ ] WebSocket integration
@@ -52,3 +52,9 @@ Pada tahap ini, aplikasi dikonfigurasi agar terhubung dengan database MySQL meng
 Pada tahap ini, aplikasi sudah memiliki fitur autentikasi dasar. User dapat melakukan register, login, logout, dan mengakses dashboard setelah berhasil login.
 
 Halaman dashboard juga sudah dilindungi menggunakan middleware auth, sehingga hanya user yang sudah login yang dapat mengakses halaman tersebut. Selain itu, data user yang melakukan registrasi berhasil tersimpan ke dalam tabel users pada database MySQL.
+
+## Progress 4 - Chat Dashboard Layout
+
+Pada tahap ini, dashboard aplikasi mulai dibuat menyerupai tampilan aplikasi chat. Dashboard menampilkan daftar user untuk kebutuhan private chat, area ruang chat, bagian group chat, dan bagian user presence.
+
+Fitur pengiriman pesan, group chat, dan status online/offline belum diaktifkan pada tahap ini karena akan dikembangkan secara bertahap pada progress berikutnya.
