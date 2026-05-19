@@ -26,5 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/group-chat/{chatGroup}', [GroupChatController::class, 'showGroupChat'])->name('group.chat');
     Route::post('/group-chat/{chatGroup}', [GroupChatController::class, 'sendGroupMessage'])->name('group.chat.send');
 
+     Route::post('/group-chat/{chatGroup}/members', [GroupChatController::class, 'addMember'])->name('group.members.add');
+    Route::delete('/group-chat/{chatGroup}/members/{user}', [GroupChatController::class, 'removeMember'])->name('group.members.remove');
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 });

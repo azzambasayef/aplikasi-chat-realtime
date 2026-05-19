@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GroupMessageSent;
 use App\Models\ChatGroup;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Events\GroupMessageSent;
 
 class GroupChatController extends Controller
 {
@@ -64,11 +64,32 @@ class GroupChatController extends Controller
             ->oldest()
             ->get();
 
+        $selectedGroupMembers = $chatGroup->users()
+            ->orderBy('name')
+            ->get();
+
+        $canManageSelectedGroup = $this->canManageGroup($chatGroup, $authUserId);
+
+        $availableGroupMembers = collect();
+
+        if ($canManageSelectedGroup) {
+            $chatGroupId = (int) $chatGroup->getKey();
+
+            $availableGroupMembers = User::whereDoesntHave('chatGroups', function ($query) use ($chatGroupId) {
+                    $query->where('chat_groups.id', $chatGroupId);
+                })
+                ->orderBy('name')
+                ->get();
+        }
+
         return view('dashboard', [
             'users' => $users,
             'chatGroups' => $chatGroups,
             'selectedGroup' => $chatGroup,
             'messages' => $messages,
+            'selectedGroupMembers' => $selectedGroupMembers,
+            'availableGroupMembers' => $availableGroupMembers,
+            'canManageSelectedGroup' => $canManageSelectedGroup,
         ]);
     }
 
@@ -96,10 +117,58 @@ class GroupChatController extends Controller
         return redirect()->route('group.chat', $chatGroup->getKey());
     }
 
+    public function addMember(Request $request, ChatGroup $chatGroup)
+    {
+        $authUserId = (int) Auth::id();
+
+        if (!$this->canManageGroup($chatGroup, $authUserId)) {
+            return redirect()->route('group.chat', $chatGroup->getKey())
+                ->with('success', 'Hanya pembuat group yang dapat menambahkan anggota.');
+        }
+
+        $validatedData = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $userId = (int) $validatedData['user_id'];
+
+        $chatGroup->users()->syncWithoutDetaching([$userId]);
+
+        return redirect()->route('group.chat', $chatGroup->getKey())
+            ->with('success', 'Anggota berhasil ditambahkan ke group.');
+    }
+
+    public function removeMember(ChatGroup $chatGroup, User $user)
+    {
+        $authUserId = (int) Auth::id();
+        $userId = (int) $user->getKey();
+        $groupCreatorId = (int) $chatGroup->getAttribute('created_by');
+
+        if (!$this->canManageGroup($chatGroup, $authUserId)) {
+            return redirect()->route('group.chat', $chatGroup->getKey())
+                ->with('success', 'Hanya pembuat group yang dapat menghapus anggota.');
+        }
+
+        if ($userId === $groupCreatorId) {
+            return redirect()->route('group.chat', $chatGroup->getKey())
+                ->with('success', 'Pembuat group tidak dapat dihapus dari group.');
+        }
+
+        $chatGroup->users()->detach($userId);
+
+        return redirect()->route('group.chat', $chatGroup->getKey())
+            ->with('success', 'Anggota berhasil dihapus dari group.');
+    }
+
     private function isGroupMember(ChatGroup $chatGroup, int $userId): bool
     {
         return $chatGroup->users()
             ->where('users.id', $userId)
             ->exists();
+    }
+
+    private function canManageGroup(ChatGroup $chatGroup, int $userId): bool
+    {
+        return (int) $chatGroup->getAttribute('created_by') === $userId;
     }
 }

@@ -37,6 +37,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] WebSocket integration
 - [x] Private chat realtime
 - [x] Group chat realtime
+- [x] Kelola anggota group
 - [ ] User presence tracking
 
 ## Catatan Pengembangan
@@ -104,3 +105,9 @@ Dengan fitur ini, penerima pesan dapat melihat pesan baru secara otomatis tanpa 
 Pada tahap ini, fitur group chat mulai menggunakan Laravel Reverb dan Laravel Echo. Pesan group yang dikirim oleh user akan dibroadcast melalui private channel berdasarkan chat_group_id.
 
 Dengan fitur ini, anggota group yang sedang membuka room group yang sama dapat menerima pesan baru secara otomatis tanpa melakukan refresh halaman.
+
+## Progress 12 - Kelola Anggota Group
+
+Pada tahap ini, fitur pengelolaan anggota group mulai ditambahkan. Pembuat group dapat melihat daftar anggota, menambahkan anggota baru, dan menghapus anggota dari group.
+
+Anggota biasa tetap dapat melihat daftar anggota group, tetapi tidak dapat menambahkan atau menghapus anggota. Fitur ini dibuat agar pengelolaan group chat menjadi lebih fleksibel sebelum masuk ke tahap user presence tracking.

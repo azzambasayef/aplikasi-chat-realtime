@@ -221,6 +221,111 @@
             </div>
         </div>
 
+        @if (isset($selectedGroup))
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-white fw-bold">
+                Anggota Group
+            </div>
+
+            <div class="card-body p-0">
+                @forelse (($selectedGroupMembers ?? collect()) as $member)
+                    @php
+                        $memberId = (int) $member->getKey();
+                        $memberName = $member->getAttribute('name');
+                        $memberEmail = $member->getAttribute('email');
+                        $groupCreatorId = (int) $selectedGroup->getAttribute('created_by');
+                        $isCreator = $memberId === $groupCreatorId;
+                    @endphp
+
+                    <div class="border-bottom p-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold">
+                                    {{ $memberName }}
+
+                                    @if ($isCreator)
+                                        <span class="badge bg-primary ms-1">Creator</span>
+                                    @endif
+                                </div>
+
+                                <small class="text-muted">
+                                    {{ $memberEmail }}
+                                </small>
+                            </div>
+
+                            @if (($canManageSelectedGroup ?? false) && !$isCreator)
+                                <form 
+                                    action="{{ route('group.members.remove', [$selectedGroup->getKey(), $memberId]) }}" 
+                                    method="POST"
+                                    onsubmit="return confirm('Hapus anggota ini dari group?')"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Hapus
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-3 text-muted">
+                        Belum ada anggota group.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        @if ($canManageSelectedGroup ?? false)
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white fw-bold">
+                    Tambah Anggota
+                </div>
+
+                <div class="card-body">
+                    @if (($availableGroupMembers ?? collect())->count() > 0)
+                        <form action="{{ route('group.members.add', $selectedGroup->getKey()) }}" method="POST">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label for="user_id" class="form-label">Pilih User</label>
+                                <select 
+                                    name="user_id" 
+                                    id="user_id" 
+                                    class="form-select @error('user_id') is-invalid @enderror"
+                                    required
+                                >
+                                    <option value="">-- Pilih anggota --</option>
+
+                                    @foreach ($availableGroupMembers as $availableUser)
+                                        <option value="{{ $availableUser->getKey() }}">
+                                            {{ $availableUser->getAttribute('name') }} - {{ $availableUser->getAttribute('email') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                @error('user_id')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Tambah ke Group
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-muted mb-0">
+                            Semua user sudah menjadi anggota group ini.
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @endif
+    @endif
+
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-header bg-white fw-bold">
                 Buat Group
