@@ -10,16 +10,22 @@
 
             <div class="card-body p-0">
                 @forelse ($users as $user)
-                    <div class="d-flex align-items-center justify-content-between border-bottom p-3">
-                        <div>
-                            <div class="fw-semibold">{{ $user->name }}</div>
-                            <small class="text-muted">{{ $user->email }}</small>
-                        </div>
+                    <a 
+                        href="{{ route('private.chat', $user->id) }}" 
+                        class="text-decoration-none text-dark"
+                    >
+                        <div class="d-flex align-items-center justify-content-between border-bottom p-3 
+                            {{ isset($selectedUser) && $selectedUser->id === $user->id ? 'bg-light' : '' }}">
+                            <div>
+                                <div class="fw-semibold">{{ $user->name }}</div>
+                                <small class="text-muted">{{ $user->email }}</small>
+                            </div>
 
-                        <span class="badge bg-secondary">
-                            Offline
-                        </span>
-                    </div>
+                            <span class="badge bg-secondary">
+                                Offline
+                            </span>
+                        </div>
+                    </a>
                 @empty
                     <div class="p-3 text-muted">
                         Belum ada user lain.
@@ -32,36 +38,103 @@
     <div class="col-md-6">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white">
-                <div class="fw-bold">Ruang Chat</div>
-                <small class="text-muted">
-                    Pilih user atau group untuk mulai chat.
-                </small>
+                @isset($selectedUser)
+                    <div class="fw-bold">{{ $selectedUser->name }}</div>
+                    <small class="text-muted">{{ $selectedUser->email }}</small>
+                @else
+                    <div class="fw-bold">Ruang Chat</div>
+                    <small class="text-muted">
+                        Pilih user untuk mulai private chat.
+                    </small>
+                @endisset
             </div>
 
-            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 420px;">
-                <div class="text-center text-muted">
-                    <h5>Belum ada percakapan dipilih</h5>
-                    <p class="mb-0">
-                        Fitur pengiriman pesan akan dibuat pada tahap private chat dan group chat.
-                    </p>
-                </div>
+            <div class="card-body" style="min-height: 420px; max-height: 420px; overflow-y: auto;">
+                @isset($selectedUser)
+                    @forelse ($messages as $message)
+                        @php
+                            $isOwnMessage = $message->sender_id === Auth::id();
+                        @endphp
+
+                        <div class="d-flex mb-3 {{ $isOwnMessage ? 'justify-content-end' : 'justify-content-start' }}">
+                            <div 
+                                class="p-3 rounded shadow-sm {{ $isOwnMessage ? 'bg-primary text-white' : 'bg-light' }}"
+                                style="max-width: 75%;"
+                            >
+                                <div class="small fw-bold mb-1">
+                                    {{ $isOwnMessage ? 'Saya' : $message->sender->name }}
+                                </div>
+
+                                <div>
+                                    {{ $message->message }}
+                                </div>
+
+                                <div class="small mt-2 {{ $isOwnMessage ? 'text-white-50' : 'text-muted' }}">
+                                    {{ $message->created_at->format('H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-muted mt-5">
+                            <h5>Belum ada pesan</h5>
+                            <p class="mb-0">
+                                Mulai percakapan dengan mengirim pesan pertama.
+                            </p>
+                        </div>
+                    @endforelse
+                @else
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center text-muted">
+                            <h5>Belum ada percakapan dipilih</h5>
+                            <p class="mb-0">
+                                Pilih salah satu user di sebelah kiri untuk membuka private chat.
+                            </p>
+                        </div>
+                    </div>
+                @endisset
             </div>
 
             <div class="card-footer bg-white">
-                <div class="input-group">
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        placeholder="Tulis pesan..." 
-                        disabled
-                    >
-                    <button class="btn btn-primary" disabled>
-                        Kirim
-                    </button>
-                </div>
-                <small class="text-muted">
-                    Form pesan masih dinonaktifkan sampai fitur chat dibuat.
-                </small>
+                @isset($selectedUser)
+                    <form action="{{ route('private.chat.send', $selectedUser->id) }}" method="POST">
+                        @csrf
+
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                name="message"
+                                class="form-control @error('message') is-invalid @enderror" 
+                                placeholder="Tulis pesan..." 
+                                autocomplete="off"
+                                required
+                            >
+                            <button class="btn btn-primary" type="submit">
+                                Kirim
+                            </button>
+
+                            @error('message')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </form>
+                @else
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            placeholder="Tulis pesan..." 
+                            disabled
+                        >
+                        <button class="btn btn-primary" disabled>
+                            Kirim
+                        </button>
+                    </div>
+                    <small class="text-muted">
+                        Pilih user terlebih dahulu untuk mengirim pesan.
+                    </small>
+                @endisset
             </div>
         </div>
     </div>
