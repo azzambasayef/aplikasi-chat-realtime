@@ -34,7 +34,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Model dan relasi chat
 - [x] Private chat
 - [x] Group chat
-- [ ] WebSocket integration
+- [x] WebSocket integration
 - [ ] User presence tracking
 
 ## Catatan Pengembangan
@@ -84,3 +84,9 @@ Pesan yang dikirim sudah tersimpan ke dalam tabel messages dan terhubung dengan 
 Pada tahap ini, fitur group chat dasar mulai dibuat. User dapat membuat group, memilih anggota group, membuka ruang group chat, mengirim pesan, dan melihat riwayat pesan group.
 
 Data group tersimpan pada tabel chat_groups, data anggota group tersimpan pada tabel chat_group_user, sedangkan pesan group tersimpan pada tabel messages dengan kolom chat_group_id. Pada tahap ini, pengiriman pesan group masih menggunakan request biasa dan belum menggunakan WebSocket atau real-time.
+
+## Progress 9 - WebSocket Integration
+
+Pada tahap ini, Laravel Reverb dan Laravel Echo mulai dikonfigurasi untuk mendukung fitur real-time pada aplikasi chat.
+
+Laravel Reverb digunakan sebagai WebSocket server, sedangkan Laravel Echo digunakan pada sisi frontend untuk menerima event yang dikirim melalui broadcasting. Pada tahap ini, konfigurasi WebSocket sudah berhasil disiapkan dan aplikasi tetap dapat berjalan menggunakan Laravel server, Reverb server, dan Vite secara bersamaan.
