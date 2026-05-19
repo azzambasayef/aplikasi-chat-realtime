@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\GroupMessageSent;
 
 class GroupChatController extends Controller
 {
@@ -84,11 +85,13 @@ class GroupChatController extends Controller
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => $authUserId,
             'chat_group_id' => $chatGroup->getKey(),
             'message' => $validatedData['message'],
         ]);
+
+        broadcast(new GroupMessageSent($message))->toOthers();
 
         return redirect()->route('group.chat', $chatGroup->getKey());
     }

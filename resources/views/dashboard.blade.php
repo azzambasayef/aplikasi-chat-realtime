@@ -368,5 +368,64 @@
     });
 </script>
 @endif
+
+@if (isset($selectedGroup))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const groupId = Number("{{ $selectedGroup->getKey() }}");
+        const authUserId = Number("{{ Auth::id() }}");
+        const chatBox = document.getElementById('chat-messages');
+
+        if (!window.Echo || !groupId || !chatBox) {
+            return;
+        }
+
+        window.Echo.private('chat-group.' + groupId)
+            .listen('.group.message.sent', function (event) {
+                const data = event.message;
+
+                if (Number(data.sender_id) === authUserId) {
+                    return;
+                }
+
+                appendGroupMessage(data);
+            });
+
+        function appendGroupMessage(data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-flex mb-3 justify-content-start';
+
+            wrapper.innerHTML = `
+                <div class="p-3 rounded shadow-sm bg-light" style="max-width: 75%;">
+                    <div class="small fw-bold mb-1">
+                        ${escapeHtml(data.sender_name)}
+                    </div>
+
+                    <div>
+                        ${escapeHtml(data.message)}
+                    </div>
+
+                    <div class="small mt-2 text-muted">
+                        ${escapeHtml(data.created_at)}
+                    </div>
+                </div>
+            `;
+
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+    });
+</script>
+@endif
+
 @endsection
 

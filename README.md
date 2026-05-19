@@ -36,7 +36,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Group chat
 - [x] WebSocket integration
 - [x] Private chat realtime
-- [ ] Group chat realtime
+- [x] Group chat realtime
 - [ ] User presence tracking
 
 ## Catatan Pengembangan
@@ -98,3 +98,9 @@ Laravel Reverb digunakan sebagai WebSocket server, sedangkan Laravel Echo diguna
 Pada tahap ini, fitur private chat mulai menggunakan Laravel Reverb dan Laravel Echo. Pesan private yang dikirim oleh user akan dibroadcast melalui private channel berdasarkan conversation_id.
 
 Dengan fitur ini, penerima pesan dapat melihat pesan baru secara otomatis tanpa melakukan refresh halaman, selama penerima sedang membuka ruang percakapan yang sama. Pengujian dilakukan menggunakan dua akun berbeda melalui browser biasa dan incognito maupun browser lainnya.
+
+## Progress 11 - Group Chat Realtime
+
+Pada tahap ini, fitur group chat mulai menggunakan Laravel Reverb dan Laravel Echo. Pesan group yang dikirim oleh user akan dibroadcast melalui private channel berdasarkan chat_group_id.
+
+Dengan fitur ini, anggota group yang sedang membuka room group yang sama dapat menerima pesan baru secara otomatis tanpa melakukan refresh halaman.
