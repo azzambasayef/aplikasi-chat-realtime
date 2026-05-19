@@ -35,7 +35,10 @@
                                 <small class="text-muted">{{ $privateUserEmail }}</small>
                             </div>
 
-                            <span class="badge bg-secondary">
+                            <span 
+                                class="badge bg-secondary"
+                                data-presence-user-id="{{ $privateUserId }}"
+                            >
                                 Offline
                             </span>
                         </div>
@@ -403,13 +406,19 @@
             </div>
 
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span>{{ Auth::user()->getAttribute('name') }}</span>
-                    <span class="badge bg-success">Online</span>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fw-semibold">Daftar User Online</span>
+                    <span id="online-users-count" class="badge bg-success">
+                        0 online
+                    </span>
                 </div>
 
-                <p class="text-muted mb-0">
-                    Status online/offline user lain akan dibuat menggunakan Laravel Reverb pada tahap presence tracking.
+                <div id="online-users-list" class="small text-muted">
+                    Memuat status online...
+                </div>
+
+                <p class="text-muted mb-0 mt-3">
+                    Status online/offline ditampilkan menggunakan Laravel Reverb dan presence channel.
                 </p>
             </div>
         </div>
@@ -531,6 +540,100 @@
     });
 </script>
 @endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const onlineUsers = new Map();
+        const onlineUsersList = document.getElementById('online-users-list');
+        const onlineUsersCount = document.getElementById('online-users-count');
+
+        if (!window.Echo) {
+            return;
+        }
+
+        window.Echo.join('online-users')
+            .here(function (users) {
+                onlineUsers.clear();
+
+                users.forEach(function (user) {
+                    onlineUsers.set(Number(user.id), user);
+                });
+
+                updatePresenceView();
+            })
+            .joining(function (user) {
+                onlineUsers.set(Number(user.id), user);
+                updatePresenceView();
+            })
+            .leaving(function (user) {
+                onlineUsers.delete(Number(user.id));
+                updatePresenceView();
+            })
+            .error(function (error) {
+                console.error('Presence channel error:', error);
+            });
+
+        function updatePresenceView() {
+            updateUserBadges();
+            updateOnlineUserList();
+        }
+
+        function updateUserBadges() {
+            const badges = document.querySelectorAll('[data-presence-user-id]');
+
+            badges.forEach(function (badge) {
+                const userId = Number(badge.getAttribute('data-presence-user-id'));
+                const isOnline = onlineUsers.has(userId);
+
+                badge.textContent = isOnline ? 'Online' : 'Offline';
+
+                badge.classList.remove('bg-success', 'bg-secondary');
+                badge.classList.add(isOnline ? 'bg-success' : 'bg-secondary');
+            });
+        }
+
+        function updateOnlineUserList() {
+            const users = Array.from(onlineUsers.values())
+                .sort(function (firstUser, secondUser) {
+                    return firstUser.name.localeCompare(secondUser.name);
+                });
+
+            if (onlineUsersCount) {
+                onlineUsersCount.textContent = users.length + ' online';
+            }
+
+            if (!onlineUsersList) {
+                return;
+            }
+
+            if (users.length === 0) {
+                onlineUsersList.innerHTML = '<div class="text-muted">Belum ada user online.</div>';
+                return;
+            }
+
+            onlineUsersList.innerHTML = users.map(function (user) {
+                return `
+                    <div class="d-flex align-items-center justify-content-between border-bottom py-2">
+                        <div>
+                            <div class="fw-semibold">${escapeHtml(user.name)}</div>
+                            <div class="text-muted">${escapeHtml(user.email)}</div>
+                        </div>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+    });
+</script>
 
 @endsection
 

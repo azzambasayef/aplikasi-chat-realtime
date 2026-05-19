@@ -30,3 +30,9 @@ Broadcast::channel('chat-group.{chatGroupId}', function (User $user, int $chatGr
         ->where('users.id', (int) $user->getKey())
         ->exists();
 });
+
+Broadcast::channel('online-users', fn (User $user) => [
+    'id' => (int) $user->getKey(),
+    'name' => (string) $user->getAttribute('name'),
+    'email' => (string) $user->getAttribute('email'),
+]);

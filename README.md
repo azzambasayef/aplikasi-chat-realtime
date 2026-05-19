@@ -38,7 +38,7 @@ Aplikasi ini dirancang agar user dapat melakukan autentikasi, mengirim pesan pri
 - [x] Private chat realtime
 - [x] Group chat realtime
 - [x] Kelola anggota group
-- [ ] User presence tracking
+- [x] User presence tracking
 
 ## Catatan Pengembangan
 
@@ -111,3 +111,9 @@ Dengan fitur ini, anggota group yang sedang membuka room group yang sama dapat m
 Pada tahap ini, fitur pengelolaan anggota group mulai ditambahkan. Pembuat group dapat melihat daftar anggota, menambahkan anggota baru, dan menghapus anggota dari group.
 
 Anggota biasa tetap dapat melihat daftar anggota group, tetapi tidak dapat menambahkan atau menghapus anggota. Fitur ini dibuat agar pengelolaan group chat menjadi lebih fleksibel sebelum masuk ke tahap user presence tracking.
+
+## Progress 13 - User Presence Tracking
+
+Pada tahap ini, aplikasi mulai mendukung fitur user presence tracking. User yang sedang membuka aplikasi akan terdeteksi sebagai online melalui presence channel Laravel Reverb.
+
+Status online/offline ditampilkan pada daftar private chat dan bagian User Presence. Fitur ini membantu user mengetahui siapa saja yang sedang aktif di aplikasi.
